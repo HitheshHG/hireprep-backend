@@ -79,28 +79,31 @@ This is batch #{batch_no}.
         return []
 
 
-def generate_questions(skills):
+def generate_questions(skills, target_count=30):
     if not skills:
         return []
 
-    all_questions = []
-
-    for i in range(1, 4):
-        all_questions.extend(
-            _generate_batch(skills, batch_no=i, batch_size=10)
-        )
-
     valid = []
-    for q in all_questions:
-        if (
-            isinstance(q, dict)
-            and "question" in q
-            and "options" in q
-            and "answer" in q
-            and "skill" in q
-            and len(q["options"]) == 3
-            and q["answer"] in q["options"]
-        ):
-            valid.append(q)
+    batch_no = 1
 
-    return valid
+    while len(valid) < target_count and batch_no <= 6:
+        batch = _generate_batch(skills, batch_no=batch_no, batch_size=10)
+
+        for q in batch:
+            if (
+                isinstance(q, dict)
+                and "question" in q
+                and "options" in q
+                and "answer" in q
+                and "skill" in q
+                and len(q["options"]) == 3
+                and q["answer"] in q["options"]
+            ):
+                valid.append(q)
+
+                if len(valid) == target_count:
+                    break
+
+        batch_no += 1
+
+    return valid[:target_count]
